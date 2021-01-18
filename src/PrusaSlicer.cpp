@@ -47,6 +47,7 @@
 #include "libslic3r/Format/SL1.hpp"
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/Thread.hpp"
+#include "libslic3r/DetoursFunctions.hpp"
 
 #include "PrusaSlicer.hpp"
 
@@ -55,6 +56,7 @@
 #endif /* SLIC3R_GUI */
 
 using namespace Slic3r;
+
 
 int CLI::run(int argc, char **argv)
 {
@@ -578,6 +580,9 @@ int CLI::run(int argc, char **argv)
 #endif // SLIC3R_GUI
     }
 
+#ifdef  WIN32
+    //FreeLibrary(hinstLib);
+#endif
     return 0;
 }
 
@@ -593,6 +598,11 @@ bool CLI::setup(int argc, char **argv)
                 boost::nowide::cerr << "Invalid SLIC3R_LOGLEVEL environment variable: " << loglevel << std::endl;
         }
     }
+
+#ifdef WIN32
+    // Detour win32 LoadLibrary functions to prevent dll injection 
+    detourLoadLibrary();
+#endif
 
     boost::filesystem::path path_to_binary = boost::filesystem::system_complete(argv[0]);
 
